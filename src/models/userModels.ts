@@ -14,6 +14,6 @@ const userSchema = new Schema<Iuser>({
   passward:{type: String, required:true}
 })
 
-const usermodel = mongoose.model<Iuser>('user', userSchema);
+const usermodel = mongoose.model<Iuser>('User', userSchema);
 
 export default usermodel;
