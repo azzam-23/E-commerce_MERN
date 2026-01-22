@@ -64,3 +64,49 @@ const updatedCart = await cart.save()
 return {data:updatedCart, statusCode:200};
 
 }
+interface updateItemInCart {
+
+  productId:any;
+  userId:string;
+  quantity: number;
+}
+
+
+export const updateItemInCart = async ({productId , quantity , userId}:updateItemInCart ) => {
+
+const cart = await GetActiveCartForUser({userId});
+
+const existsInCart = cart.items.find((p) => p.product.toString() === productId);
+
+if(!existsInCart) {
+  return {data: "item does not exist in cart", statusCart:400};
+}
+const product = await productModel.findById(productId);
+
+if(!product) {
+  return {data: "product not found!", statusCode:400};
+
+}
+ if(product.stock < quantity) {
+  return {data: "Low stock for item", statusCode: 400};
+ }
+
+
+existsInCart.quantity = quantity;
+
+const otherCartItems = cart.items.filter((p) => p.product.toString() !==  productId)
+ let total = otherCartItems.reduce((sum, product) => {
+  sum+= product.quantity * product.unitPrice;
+  return sum;
+ },0);
+
+ existsInCart.quantity = quantity;
+
+ total += existsInCart.quantity* existsInCart.unitPrice;
+
+ cart.totalAmount = total;
+
+ const updatedCart = await cart.save();
+
+ return {data:updatedCart, statusCode:200};
+}
