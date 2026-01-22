@@ -1,10 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken"
 import usermodel from "../models/userModels.ts";
+import type { ExtendRequset } from "../types/extendedRequest.ts";
 
-interface ExtendRequset extends  Request {
-  user?: any;
-}
 
 const vaildateJWT = (req: ExtendRequset, res: Response, next : NextFunction) => {
  const authorizationHeader = req.get('authorization');
