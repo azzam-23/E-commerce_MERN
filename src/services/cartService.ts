@@ -1,5 +1,5 @@
 import type { ModifiedPathsSnapshot, Document, Model, DefaultSchemaOptions, Types, ClientSession, DocumentSetOptions, QueryOptions, MergeType, UpdateQuery, AnyObject, PopulateOptions, Query, SaveOptions, ToObjectOptions, UpdateWithAggregationPipeline, pathsToSkip, Error } from "mongoose";
-import { cartModel, type ICartItem } from "../models/cartModel.ts";
+import { cartModel, type ICart, type ICartItem } from "../models/cartModel.ts";
 import productModel from "../models/productModel.ts";
 
 interface createCartForUser{
@@ -24,6 +24,21 @@ export const GetActiveCartForUser = async ({ userId }: GetActiveCartForUser,) =>
   }
    return cart;
 };
+
+interface ClearCart{
+   userId: string;
+}
+
+export const  clearCart = async ({userId} : ClearCart) => {
+  const cart =  await GetActiveCartForUser({userId});
+  cart.items = [];
+  cart.totalAmount = 0;
+
+  const updatedCart = await cart.save();
+
+  return {data: updatedCart , statusCode:200};
+}
+
 
 interface AddItemToCart {
   productId:any;
@@ -94,11 +109,9 @@ if(!product) {
 
 existsInCart.quantity = quantity;
 
-const otherCartItems = cart.items.filter((p) => p.product.toString() !==  productId)
- let total = otherCartItems.reduce((sum, product) => {
-  sum+= product.quantity * product.unitPrice;
-  return sum;
- },0);
+const otherCartItems = cart.items.filter((p) => p.product.toString() !==  productId);
+
+ let total = calculateCartTotalItems({cartItems: otherCartItems})
 
  existsInCart.quantity = quantity;
 
@@ -109,4 +122,45 @@ const otherCartItems = cart.items.filter((p) => p.product.toString() !==  produc
  const updatedCart = await cart.save();
 
  return {data:updatedCart, statusCode:200};
+};
+
+interface DeleteItemInCart {
+
+  productId:any;
+  userId:string;
+}
+
+
+ export const  deleteItemInCart = async ({userId,productId}: DeleteItemInCart) => {
+  const cart = await GetActiveCartForUser({userId});
+const existsInCart = cart.items.find((p) => p.product.toString() === productId);
+
+if(!existsInCart) {
+  return {data: "item does not exist in cart", statusCart:400};
+}
+
+const otherCartItems = cart.items.filter((p) => p.product.toString() !==  productId);
+
+
+ const total = calculateCartTotalItems({cartItems: otherCartItems})
+
+ cart.items = otherCartItems;
+
+ cart.totalAmount = total;
+
+ const updatedCart = await cart.save();
+
+  return {data:updatedCart, statusCode:200};
+
+}
+
+const calculateCartTotalItems = ({cartItems }: {cartItems: ICartItem[];}) =>{
+
+  
+  const total = cartItems.reduce((sum, product) => {
+  sum+= product.quantity * product.unitPrice;
+  return sum;
+ },0);
+
+ return total;
 }

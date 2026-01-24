@@ -1,5 +1,5 @@
 import express from "express";
-import { addItemToCart, GetActiveCartForUser, updateItemInCart } from "../services/cartService.ts";
+import { addItemToCart, clearCart, deleteItemInCart, GetActiveCartForUser, updateItemInCart } from "../services/cartService.ts";
 import vaildateJWT from "../middleWares/validateJWT.ts";
 import type { ExtendRequset } from "../types/extendedRequest.ts";
 
@@ -14,6 +14,12 @@ router.get('/', vaildateJWT, async (req: ExtendRequset, res) => {
   res.status(200).send(cart);
 });
 
+router.delete("/", vaildateJWT, async (req:ExtendRequset, res) =>{
+  const userId = req?.user?._id;
+  const response = await clearCart({userId});
+  res.status(res.statusCode).send(response.data);
+})
+
  router.post('/items', vaildateJWT, async (req : ExtendRequset,res) => {
   const userId = req?.user?._id;
   const {productId,quantity} = req.body;
@@ -26,6 +32,15 @@ router.put("/items", vaildateJWT, async (req:ExtendRequset, res) => {
   const{ productId ,quantity } = req.body;
   const response = await updateItemInCart({userId , productId , quantity});
   res.status(response.statusCode?? 500).send(response.data);
+});
+
+router.delete("/items/:productId", vaildateJWT, async (req:ExtendRequset, res) => {
+  const userId = req?.user?._id;
+  const {productId} = req.params;
+
+  const response = await deleteItemInCart({userId,productId});
+  res.status(response.statusCode?? 500).send(response.data);
+  
 })
 
 export default router;
