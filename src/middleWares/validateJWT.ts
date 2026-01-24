@@ -18,7 +18,7 @@ const vaildateJWT = (req: ExtendRequset, res: Response, next : NextFunction) => 
   return;
  }
 
-  jwt.verify(token, "fjffjkfkdkkk4k4k5kk4l4l43kk5", async (err,payload) => {
+  jwt.verify(token, process.env.JWT_SECRET || '', async (err,payload) => {
   if(err){
    res.status(403).send("Invalid token")
   return;

@@ -5,7 +5,9 @@ export const getAllProducts =  async () => {
 }
 
  export const seedInitialProducts = async () => {
-  const products = [
+
+  try {
+   const products = [
     {title:"product Deel laptop",image:"https://pisces.bbystatic.com/image2/BestBuy_US/images/products/6299/6299821_sd.jpg", price:2500,stock:100},
    
   ];
@@ -15,4 +17,8 @@ export const getAllProducts =  async () => {
   if(existingProduct.length===0){
     await productModel.insertMany(products);
   }
+  } catch (err){
+   console.error("cannot see database", err)
+  }
+ 
  }
