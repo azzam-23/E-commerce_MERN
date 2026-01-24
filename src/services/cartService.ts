@@ -1,6 +1,7 @@
 import type { ModifiedPathsSnapshot, Document, Model, DefaultSchemaOptions, Types, ClientSession, DocumentSetOptions, QueryOptions, MergeType, UpdateQuery, AnyObject, PopulateOptions, Query, SaveOptions, ToObjectOptions, UpdateWithAggregationPipeline, pathsToSkip, Error } from "mongoose";
 import { cartModel, type ICart, type ICartItem } from "../models/cartModel.ts";
 import productModel from "../models/productModel.ts";
+import { orderModel, type IOrderItem } from "../models/orderModel.ts";
 
 interface createCartForUser{
   userId: string;
@@ -163,4 +164,50 @@ const calculateCartTotalItems = ({cartItems }: {cartItems: ICartItem[];}) =>{
  },0);
 
  return total;
+}
+
+interface Checkout {
+  userId:string;
+  address:string;
+}
+export const checkout =  async ({userId, address} : Checkout) => {
+
+ if(!address) {
+  return {data: "please add address", statusCode:400};
+ } 
+  const cart = await GetActiveCartForUser({userId});
+
+const orderItems: IOrderItem[] = [];
+
+for(const item of cart.items){
+  const product = await productModel.findById(item.product)
+
+  if (!product) {
+    return {data: "product not found", statusCode:400}
+  }
+  const orderItem : IOrderItem ={
+    productTitle: product.title,
+    productImage: product.image,
+    quantity: item.quantity,
+    unitPrice: item.unitPrice
+  }
+
+  orderItems.push(orderItem)
+}
+
+const order = await orderModel.create({
+  orderItems,
+  total:cart.totalAmount,
+  userId,
+  address, 
+});
+
+await order.save();
+
+cart.status = "completed";
+
+await cart.save;
+
+ return{data: order, statusCode:200}
+ 
 }

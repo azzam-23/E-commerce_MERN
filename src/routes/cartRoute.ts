@@ -1,5 +1,5 @@
 import express from "express";
-import { addItemToCart, clearCart, deleteItemInCart, GetActiveCartForUser, updateItemInCart } from "../services/cartService.ts";
+import { addItemToCart, checkout, clearCart, deleteItemInCart, GetActiveCartForUser, updateItemInCart } from "../services/cartService.ts";
 import vaildateJWT from "../middleWares/validateJWT.ts";
 import type { ExtendRequset } from "../types/extendedRequest.ts";
 
@@ -41,6 +41,14 @@ router.delete("/items/:productId", vaildateJWT, async (req:ExtendRequset, res) =
   const response = await deleteItemInCart({userId,productId});
   res.status(response.statusCode?? 500).send(response.data);
   
+});
+
+router.post("/checkout" , vaildateJWT, async (req: ExtendRequset, res) => {
+  const userId = req?.user?._id;
+  const {address} = req.body;
+  const response = await checkout({userId, address});
+  res.status(response.statusCode ?? 500).send(response.data);
 })
+
 
 export default router;
