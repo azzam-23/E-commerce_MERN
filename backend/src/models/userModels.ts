@@ -4,16 +4,16 @@ export interface Iuser extends Document {
  firstName:string;
  lastName:string;
  email:string;
- passward:string;
+ password:string;
 }
 
 const userSchema = new Schema<Iuser>({
   firstName:{type: String, required:true},
   lastName:{type: String, required:true},
   email:{type: String, required:true},
-  passward:{type: String, required:true}
+  password:{type: String, required:true}
 })
 
-const usermodel = mongoose.model<Iuser>('User', userSchema);
+const usermodel = mongoose.model<Iuser>('user', userSchema);
 
 export default usermodel;
