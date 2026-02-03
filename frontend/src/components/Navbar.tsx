@@ -6,8 +6,15 @@ import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import AdbIcon from '@mui/icons-material/Adb';
+import { useAuth } from '../context/Auth/AuthContext';
 
 const Navbar = () => {
+
+  const {username, token} = useAuth();
+
+
+  console.log('from navbar', {username,token});
+
   return (
     <AppBar position="static">
       <Toolbar disableGutters sx={{ px: 2 }}>
