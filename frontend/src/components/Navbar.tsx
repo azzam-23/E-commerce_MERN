@@ -11,13 +11,18 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/Auth/AuthContext";
 
 function ResponsiveAppBar() {
-  const { username, isAuthenticated } = useAuth();
+  const { username, isAuthenticated , logout } = useAuth();
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
   const handleLogin = () => {
     navigate("/login");
   };
+
+  const handellogout = () => {
+  logout();
+  navigate('/')
+  }
 
   const avatarLetter = username ? username.charAt(0).toUpperCase() : "";
 
@@ -72,7 +77,7 @@ function ResponsiveAppBar() {
                 <MenuItem
                   onClick={() => {
                     setAnchorElUser(null);
-                    logout();
+                    handellogout()
                   }}
                 >
                   Logout
