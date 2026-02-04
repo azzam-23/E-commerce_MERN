@@ -16,8 +16,10 @@ const login = (username: string, token:string) => {
   localStorage.setItem("username", username);
   localStorage.setItem('token', token)
 }
+
+const isAuthentcated = !!token;
   return(
-    <AuthContext.Provider value={{username, token, login}}>
+    <AuthContext.Provider value={{username, token, login, isAuthentcated}}>
       {children}
     </AuthContext.Provider>
   )

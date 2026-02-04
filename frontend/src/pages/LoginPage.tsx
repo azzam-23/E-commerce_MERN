@@ -5,46 +5,41 @@ import { BASE_URL } from "../constants/baseUrl";
 import { useAuth } from "../context/Auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const RegisterPage = () => {
+const LoginPage = () => {
   const[error, setError] = useState("")
-  const firstNameRef = useRef<HTMLInputElement>(null);
-  const lastNameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
+
+   const navigate = useNavigate();
 
   const {login} = useAuth();
 
   
 
   const onsubmit = async () => {
-    const firstName = firstNameRef.current?.value;
-    const lastName = lastNameRef.current?.value;
     const email = emailRef.current?.value;
     const password = passwordRef.current?.value;
 
-    if(!firstName|| !lastName || !email || !password) {
+    if( !email || !password) {
       setError("check sumbiting data!")
       return;
     }
 
-    console.log(firstName,lastName, email, password);
+    console.log( email, password);
 
-    const response = await fetch(`${BASE_URL}/user/register`, {
+    const response = await fetch(`${BASE_URL}/user/login`, {
       method: "POST",
       headers:{
         'Content-Type':"application/json"
       },
       body: JSON.stringify({
-        firstName,
-        lastName,
         email,
         password,
       }),
     });
 
     if(!response.ok){
-      setError("Unable to register user please try again")
+      setError("Unable to Login user please try again")
       return;
     }
 
@@ -55,8 +50,8 @@ if(!token){
 }
  
   login(email,token);
-  navigate('/');
 
+  navigate('/');
 
     console.log(token);
   };
@@ -71,7 +66,7 @@ if(!token){
           mt: 4,
         }}
       ></Box>
-      <Typography variant="h6">Register New Account</Typography>
+      <Typography variant="h6">Login to your Account</Typography>
       <Box
         sx={{
           display: "flex",
@@ -81,8 +76,7 @@ if(!token){
           width: "200px",
         }}
       >
-        <TextField inputRef={firstNameRef} label="First Name" name="fullName" />
-        <TextField inputRef={lastNameRef} label="Last Name" name="lastname" />
+      
         <TextField inputRef={emailRef} label="Email" name="email" />
         <TextField
           inputRef={passwordRef}
@@ -91,7 +85,7 @@ if(!token){
           type="password"
         />
         <Button onClick={onsubmit} variant="contained">
-          REGISTER
+          Login
         </Button>
         {error && <Typography sx={{color:"red"}}>{error}</Typography>}
       </Box>
@@ -99,4 +93,4 @@ if(!token){
   );
 };
 
-export default RegisterPage;
+export default LoginPage;
