@@ -1,4 +1,4 @@
-import {  useState, type FC, type PropsWithChildren } from "react";
+import {  useEffect, useState, type FC, type PropsWithChildren } from "react";
 import {AuthContext} from './AuthContext'
  
 const USERNAME_KEY = 'username';
@@ -12,15 +12,20 @@ const [username, setUsername] = useState<string | null>(() =>
 
   const [token, setToken] = useState<string | null>(() =>
     localStorage.getItem(TOKEN_KEY));
+  
+useEffect(() => {
+  if (!token) return; // skip fetch if no token
+}, [token]);
 
   const isAuthenticated = !!token;
 
-const login = (username: string, token:string) => {
+const login = (username: string, token: string) => {
   setUsername(username);
   setToken(token);
   localStorage.setItem(USERNAME_KEY, username);
-  localStorage.setItem(TOKEN_KEY, token)
-}
+  localStorage.setItem(TOKEN_KEY, token);
+};
+
  
 const logout = () => {
 localStorage.removeItem(USERNAME_KEY);

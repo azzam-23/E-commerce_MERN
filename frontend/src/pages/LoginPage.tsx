@@ -6,67 +6,57 @@ import { useAuth } from "../context/Auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const[error, setError] = useState("")
+  const [error, setError] = useState("");
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-   const navigate = useNavigate();
-
-  const {login} = useAuth();
-
-  
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const onsubmit = async () => {
     const email = emailRef.current?.value;
     const password = passwordRef.current?.value;
 
-    if( !email || !password) {
-      setError("check sumbiting data!")
+    if (!email || !password) {
+      setError("Check submitted data!");
       return;
     }
 
-    console.log( email, password);
+    try {
+      const response = await fetch(`${BASE_URL}/user/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const response = await fetch(`${BASE_URL}/user/login`, {
-      method: "POST",
-      headers:{
-        'Content-Type':"application/json"
-      },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
+      if (!response.ok) {
+        setError("Unable to login. Please try again.");
+        return;
+      }
 
-    if(!response.ok){
-      setError("Unable to Login user please try again")
-      return;
+      // ✅ FIX IS HERE
+      const data = await response.json();
+
+      if (!data?.token || !data?.username) {
+        setError("Invalid login response");
+        return;
+      }
+
+      // ✅ token MUST be a string
+      login(data.username, data.token);
+
+      navigate("/");
+    } catch (err) {
+      setError("Something went wrong");
     }
-
-    const token = await response.json();
-if(!token){
-  setError("incorrect token")
-  return;
-}
- 
-  login(email,token);
-
-  navigate('/');
-
-    console.log(token);
   };
+
   return (
     <Container>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          mt: 4,
-        }}
-      ></Box>
       <Typography variant="h6">Login to your Account</Typography>
+
       <Box
         sx={{
           display: "flex",
@@ -76,18 +66,18 @@ if(!token){
           width: "200px",
         }}
       >
-      
-        <TextField inputRef={emailRef} label="Email" name="email" />
+        <TextField inputRef={emailRef} label="Email" />
         <TextField
           inputRef={passwordRef}
           label="Password"
-          name="password"
           type="password"
         />
+
         <Button onClick={onsubmit} variant="contained">
           Login
         </Button>
-        {error && <Typography sx={{color:"red"}}>{error}</Typography>}
+
+        {error && <Typography color="red">{error}</Typography>}
       </Box>
     </Container>
   );

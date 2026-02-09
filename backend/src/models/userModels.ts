@@ -1,6 +1,7 @@
 import mongoose, {Schema,Document} from "mongoose";
 
 export interface Iuser extends Document {
+ userId: any;
  firstName:string;
  lastName:string;
  email:string;

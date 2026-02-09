@@ -16,20 +16,17 @@ router.post("/register", async (req, res) => {
 
     res.status(statusCode).json(data);
   } catch (err) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "cannot reg" });
   }
 });
-
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    const { statusCode, data } = await login({ email, password });
-
-    res.status(statusCode).json(data);
+    const response = await login(req.body);
+    res.status(response.statusCode).json(response.data);
   } catch (err) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).send("cannot login !");
   }
 });
+
 
 export default router;

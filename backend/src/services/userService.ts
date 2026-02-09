@@ -9,6 +9,21 @@ interface RegisterParams {
   password: string;
 }
 
+interface LoginParams {
+  email: string;
+  password: string;
+}
+
+const generateJWT = (userId: string) => {
+  return jwt.sign(
+    { userId },
+    process.env.JWT_SECRET!,
+    { expiresIn: "7d" }
+  );
+};
+
+/* ================= REGISTER ================= */
+
 export const register = async ({
   firstName,
   lastName,
@@ -18,10 +33,7 @@ export const register = async ({
   const findUser = await usermodel.findOne({ email });
 
   if (findUser) {
-    return {
-      statusCode: 400,
-      data: { message: "User already exists!" },
-    };
+    return { data: "User already exists!", statusCode: 400 };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -35,56 +47,38 @@ export const register = async ({
 
   await newUser.save();
 
+  const token = generateJWT(newUser._id.toString());
+
   return {
     statusCode: 200,
     data: {
-      token: generateJWT({
-        firstName,
-        lastName,
-        email,
-      }),
+      username: `${newUser.firstName} ${newUser.lastName}`,
+      token,
     },
   };
 };
 
-interface LoginParams {
-  email: string;
-  password: string;
-}
+/* ================= LOGIN ================= */
 
 export const login = async ({ email, password }: LoginParams) => {
   const findUser = await usermodel.findOne({ email });
 
   if (!findUser) {
-    return {
-      statusCode: 400,
-      data: { message: "Incorrect email or password!" },
-    };
+    return { data: "Incorrect email or password!", statusCode: 400 };
   }
 
   const passwordMatch = await bcrypt.compare(password, findUser.password);
-
   if (!passwordMatch) {
-    return {
-      statusCode: 400,
-      data: { message: "Incorrect email or password!" },
-    };
+    return { data: "Incorrect email or password!", statusCode: 400 };
   }
+
+  const token = generateJWT(findUser._id.toString());
 
   return {
     statusCode: 200,
     data: {
-      token: generateJWT({
-        email,
-        firstName: findUser.firstName,
-        lastName: findUser.lastName,
-      }),
+      username: `${findUser.firstName} ${findUser.lastName}`,
+      token,
     },
   };
-};
-
-const generateJWT = (data: any) => {
-  return jwt.sign(data, process.env.JWT_SECRET || "secret", {
-    
-  });
 };

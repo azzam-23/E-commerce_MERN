@@ -1,42 +1,44 @@
-import type { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken"
-import usermodel from "../models/userModels.ts";
-import type { ExtendRequset } from "../types/extendedRequest.ts";
+import type { Request, Response, NextFunction } from "express";
+import jwt, { type JwtPayload } from "jsonwebtoken";
 
-
-const vaildateJWT = (req: ExtendRequset, res: Response, next : NextFunction) => {
- const authorizationHeader = req.get('authorization');
-
- if(!authorizationHeader){
-  res.status(403).send("Authorization heeader was not provider");
-  return;
- }
-
- const token = authorizationHeader.split(" ")[1];
- if(!token){
-  res.status(403).send("Bearer token not found");
-  return;
- }
-
-  jwt.verify(token, process.env.JWT_SECRET || '', async (err,payload) => {
-  if(err){
-   res.status(403).send("Invalid token")
-  return;
-  }
-  
-  if(!payload) {
-    res.status(403).send("invalid token payload");
-    return;
-  }
-  const userPayload = payload as {
-    email:string;
-    firstName:string;
-    lastName:string;
-  };
-  const user = await usermodel.findOne({email:userPayload.email})
-  req.user= user;
-  next();
- })
+interface TokenPayload extends JwtPayload {
+  userId: string;
 }
 
-export default vaildateJWT;
+const validateJWT = (
+  req: Request & { user?: TokenPayload },
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.authorization;
+
+  // ✅ HARD GUARD — fixes the error
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(403).send("Access denied");
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  // ✅ EXTRA SAFETY (TypeScript + runtime)
+  if (!token) {
+    return res.status(403).send("Token missing");
+  }
+
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as unknown as TokenPayload;
+
+    if (!decoded.userId) {
+      return res.status(403).send("Invalid token payload");
+    }
+
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(403).send("Invalid token");
+  }
+};
+
+export default validateJWT;

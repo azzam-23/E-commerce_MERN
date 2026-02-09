@@ -206,7 +206,7 @@ await order.save();
 
 cart.status = "completed";
 
-await cart.save;
+await cart.save();
 
  return{data: order, statusCode:200}
  

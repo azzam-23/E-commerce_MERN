@@ -4,15 +4,18 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
-import { Button, Container, Menu, MenuItem, Box } from "@mui/material";
+import { Button, Container, Menu, MenuItem, Box, Badge } from "@mui/material";
+import { ShoppingCart } from "@mui/icons-material";
 import AdbIcon from "@mui/icons-material/Adb";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/Auth/AuthContext";
 
 function ResponsiveAppBar() {
-  const { username, isAuthenticated , logout } = useAuth();
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const { username, isAuthenticated, logout } = useAuth();
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
+    null,
+  );
   const navigate = useNavigate();
 
   const handleLogin = () => {
@@ -20,8 +23,12 @@ function ResponsiveAppBar() {
   };
 
   const handellogout = () => {
-  logout();
-  navigate('/')
+    logout();
+    navigate("/");
+  };
+
+  const handelCart = () =>{
+    navigate('/cart')
   }
 
   const avatarLetter = username ? username.charAt(0).toUpperCase() : "";
@@ -30,7 +37,6 @@ function ResponsiveAppBar() {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          
           {/* 🔹 LEFT SIDE: LOGO + NAME */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <AdbIcon sx={{ mr: 1 }} />
@@ -51,8 +57,19 @@ function ResponsiveAppBar() {
           </Box>
 
           {/* 🔹 PUSH RIGHT CONTENT */}
-          <Box sx={{ flexGrow: 1 }} />
-
+          <Box
+            display="flex"
+            flexDirection="row"
+            flexGrow={1}
+            gap={4}
+            alignItems="center"
+            justifyContent="center"
+          />
+          <IconButton aria-label="cart" onClick={handelCart}>
+            <Badge badgeContent={4} color="secondary">
+              <ShoppingCart sx={{color:'#ffffff'}} />
+            </Badge>
+          </IconButton>
           {/* 🔹 RIGHT SIDE: AUTH */}
           {isAuthenticated ? (
             <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -77,7 +94,7 @@ function ResponsiveAppBar() {
                 <MenuItem
                   onClick={() => {
                     setAnchorElUser(null);
-                    handellogout()
+                    handellogout();
                   }}
                 >
                   Logout
@@ -85,11 +102,7 @@ function ResponsiveAppBar() {
               </Menu>
             </Box>
           ) : (
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleLogin}
-            >
+            <Button variant="contained" color="success" onClick={handleLogin}>
               Login
             </Button>
           )}
